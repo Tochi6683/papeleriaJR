@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Producto</title>
+</head>
+<body>
+
+    <h2>Agregar Nuevo Producto</h2>
+    
+    <!-- Formulario de productos -->
+    <form action="insertar_producto.php" method="POST">
+        <label for="nombre_producto">Nombre del Producto:</label>
+        <input type="text" name="nombre_producto" id="nombre_producto" required>
+        <br><br>
+
+        <label for="precio_producto">Precio del Producto:</label>
+        <input type="number" step="0.01" name="precio_producto" id="precio_producto" required>
+        <br><br>
+
+        <label for="descripcion_producto">Descripción del Producto:</label>
+        <textarea name="descripcion_producto" id="descripcion_producto" required></textarea>
+        <br><br>
+
+        <input type="submit" value="Agregar Producto">
+    </form>
+
+</body>
+</html>

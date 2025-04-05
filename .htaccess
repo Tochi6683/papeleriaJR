@@ -1,0 +1,22 @@
+# Habilitar la reescritura de URLs
+RewriteEngine On
+
+# Redirigir todas las solicitudes a index.php excepto los archivos y carpetas existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ index.php?page=$1 [QSA,L]
+
+# Permitir el acceso a archivos estáticos como imágenes, CSS y JavaScript
+<FilesMatch "\.(jpg|jpeg|png|gif|css|js|woff|woff2|ttf|svg|ico|eot)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+# Corrección para evitar problemas con archivos en subcarpetas
+RewriteBase /papeleriaJR/
+
+# Manejo de errores
+ErrorDocument 404 /views/404.php
+
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>

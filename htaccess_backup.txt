@@ -1,0 +1,16 @@
+# Habilitar la reescritura de URLs
+RewriteEngine On
+
+# Definir la carpeta base del proyecto
+RewriteBase /papeleriaJR/
+
+# Redirigir URLs limpias a sus archivos PHP correspondientes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ views/$1.php [L]
+
+# Redirigir la raíz del proyecto a la vista principal
+DirectoryIndex views/index.php
+
+# Manejo de errores 404 personalizados
+ErrorDocument 404 /views/error404.php

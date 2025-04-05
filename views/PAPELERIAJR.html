@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Roles, Facturación y Stock</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1f3d2c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            overflow: auto;
+        }
+
+        .container {
+            width: 350px;
+            background-color: #2f4f3c;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f4c542;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .btn {
+            background-color: #3c6e47;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #2f5a36;
+        }
+
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            background-color: #4a6351;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sección de Inicio de Sesión -->
+<div class="container" id="login-section">
+    <div class="title">JR PAPELERÍA</div>
+    <p>Inicio de Sesión</p>
+    
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Usuario" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Contraseña" required>
+        </div>
+        
+        <button type="submit" class="btn">Iniciar Sesión</button>
+        <p id="login-error" style="display: none; color: red;">Credenciales incorrectas</p>
+    </form>
+</div>
+
+<!-- Sección de Facturación -->
+<div class="container" id="billing-section" style="display: none;">
+    <h2>Facturación</h2>
+
+    <div class="input-group">
+        <label for="client">Seleccionar Cliente:</label>
+        <select id="client">
+            <option value="Cliente 1">Cliente 1</option>
+            <option value="Cliente 2">Cliente 2</option>
+            <option value="Cliente 3">Cliente 3</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="product">Producto:</label>
+        <input type="text" id="product" placeholder="Nombre del producto">
+    </div>
+
+    <div class="input-group">
+        <label for="price">Precio:</label>
+        <input type="number" id="price" placeholder="Precio">
+    </div>
+
+    <button id="add-product" class="btn">Agregar Producto</button>
+
+    <ul id="product-list"></ul>
+    
+    <button id="go-to-stock" class="btn">Siguiente</button>
+</div>
+
+<!-- Sección de Actualización de Stock -->
+<div class="container" id="stock-section" style="display: none;">
+    <h2>Actualizar Stock</h2>
+
+    <div class="input-group">
+        <label for="stock-product">Producto:</label>
+        <select id="stock-product">
+            <option value="">Selecciona un producto</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="new-price">Nuevo Precio:</label>
+        <input type="number" id="new-price" placeholder="Nuevo Precio">
+    </div>
+
+    <button id="update-stock" class="btn">Actualizar</button>
+</div>
+
+<script>
+    const adminCredentials = { username: "admin", password: "admin123" };
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    // Manejo de inicio de sesión
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (username === adminCredentials.username && password === adminCredentials.password) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('billing-section').style.display = 'block';
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    });
+
+    // Agregar producto a la factura
+    document.getElementById("add-product").addEventListener("click", function () {
+        const product = document.getElementById("product").value;
+        const price = parseFloat(document.getElementById("price").value);
+
+        if (product && !isNaN(price)) {
+            products.push({ product, price });
+            localStorage.setItem("products", JSON.stringify(products));
+
+            const li = document.createElement("li");
+            li.textContent = `${product} - $${price.toFixed(2)}`;
+            document.getElementById("product-list").appendChild(li);
+
+            document.getElementById("product").value = '';
+            document.getElementById("price").value = '';
+
+            updateStockDropdown();
+        }
+    });
+
+    // Ir a la sección de actualización de stock
+    document.getElementById("go-to-stock").addEventListener("click", function () {
+        document.getElementById("billing-section").style.display = "none";
+        document.getElementById("stock-section").style.display = "block";
+        updateStockDropdown();
+    });
+
+    // Llenar el dropdown con productos existentes
+    function updateStockDropdown() {
+        const stockDropdown = document.getElementById("stock-product");
+        stockDropdown.innerHTML = '<option value="">Selecciona un producto</option>';
+
+        products.forEach((item, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = `${item.product} - $${item.price.toFixed(2)}`;
+            stockDropdown.appendChild(option);
+        });
+    }
+
+    // Actualizar precio de un producto
+    document.getElementById("update-stock").addEventListener("click", function () {
+        const selectedIndex = document.getElementById("stock-product").value;
+        const newPrice = parseFloat(document.getElementById("new-price").value);
+
+        if (selectedIndex !== "" && !isNaN(newPrice)) {
+            products[selectedIndex].price = newPrice;
+            localStorage.setItem("products", JSON.stringify(products));
+            alert("Precio actualizado correctamente");
+            updateStockDropdown();
+        }
+    });
+
+    updateStockDropdown();
+</script>
+
+</body>
+</html>
